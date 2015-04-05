@@ -76,6 +76,7 @@ update:
 	cd cudaPcl; git pull; cd -
 	cd mmf; git pull; cd -
 	cd jsCore; git pull; cd -
+	cd kinect; svn up; cd -
 
 # other (custom) targets are passed through to the cmake-generated Makefile
 %::
