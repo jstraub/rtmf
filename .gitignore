@@ -1,0 +1,12 @@
+build
+jsCore
+mmf
+cudaPcl
+pod-build
+*~
+*.pyc
+*.csv
+tags
+*.swp
+*.swo
+*.lbl
