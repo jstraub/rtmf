@@ -2,6 +2,7 @@ build
 jsCore
 mmf
 cudaPcl
+kinect
 pod-build
 *~
 *.pyc
