@@ -64,10 +64,13 @@ configure:
 
 
 checkout:
-	git clone /data/vision/fisher/code/jstraub/gitrep/research/jsCore.git/
-	git clone /data/vision/fisher/code/jstraub/gitrep/research/cudaPcl.git/
-	git clone /data/vision/fisher/code/jstraub/gitrep/research/mmf.git/
+	git clone git@github.com:jstraub/jsCore.git
+	git clone git@github.com:jstraub/cudaPcl.git
+	git clone git@github.com:jstraub/mmf.git
 	svn co https://svn.csail.mit.edu/rrg_pods/drivers/kinect
+#	git clone /data/vision/fisher/code/jstraub/gitrep/research/jsCore.git/
+#	git clone /data/vision/fisher/code/jstraub/gitrep/research/cudaPcl.git/
+#	git clone /data/vision/fisher/code/jstraub/gitrep/research/mmf.git/
 
 update:
 	cd cudaPcl; git pull; cd -
