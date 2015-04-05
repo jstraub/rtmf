@@ -63,19 +63,21 @@ target_link_libraries (realtimeMF
   boost_system boost_thread boost_program_options
   pcl_common pcl_io pcl_visualization pcl_filters pcl_features
   pcl_search
-  opencv_contrib
   opencv_core opencv_highgui opencv_imgproc
+  opencv_contrib
   )
 
 cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
+  ./src/jpeg-utils-ijg.c
   )
 target_link_libraries (realtimeMF_lcm
   jsCore cudaPcl mmf
   boost_system boost_thread boost_program_options
   pcl_common pcl_io pcl_visualization pcl_filters pcl_features
   pcl_search
-  opencv_contrib
   opencv_core opencv_highgui opencv_imgproc
+  opencv_contrib
+  jpeg z png
   )
 
 pods_use_pkg_config_packages(realtimeMF_lcm
