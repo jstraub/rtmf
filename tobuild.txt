@@ -1,3 +1,4 @@
 jsCore
 cudaPcl
 mmf
+kinect

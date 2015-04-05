@@ -68,6 +68,17 @@ target_link_libraries (realtimeMF
   opencv_core opencv_highgui opencv_imgproc
   )
 
+cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
+  )
+target_link_libraries (realtimeMF_lcm
+  jsCore cudaPcl mmf
+  boost_system boost_thread boost_program_options
+  pcl_common pcl_io pcl_visualization pcl_filters pcl_features
+  pcl_search
+  opencv_contrib
+  opencv_core opencv_highgui opencv_imgproc
+  )
+
 
 install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
           FILES_MATCHING PATTERN "*.h")

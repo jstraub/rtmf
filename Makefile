@@ -67,6 +67,7 @@ checkout:
 	git clone /data/vision/fisher/code/jstraub/gitrep/research/jsCore.git/
 	git clone /data/vision/fisher/code/jstraub/gitrep/research/cudaPcl.git/
 	git clone /data/vision/fisher/code/jstraub/gitrep/research/mmf.git/
+	svn co https://svn.csail.mit.edu/rrg_pods/drivers/kinect
 
 update:
 	cd cudaPcl; git pull; cd -
