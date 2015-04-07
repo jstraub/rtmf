@@ -133,9 +133,8 @@ int main (int argc, char** argv)
           ofstream::out);
       for(uint32_t i=0; i<3;++i) 
       {
-        for(uint32_t j=0; j<3;++j) 
-          out << pRtmf->cRmf()(i,j);
-        out<<endl;
+        for(uint32_t j=0; j<2;++j) out << pRtmf->cRmf()(i,j)<<" ";
+        out << pRtmf->cRmf()(i,2)<<endl;
       }
       out.close();
     }

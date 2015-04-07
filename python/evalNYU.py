@@ -78,7 +78,7 @@ mode = ['multiFromFile']
 
 reRun = True
 printCmd = True
-onlyPaperEval = False
+onlyPaperEval = True
 
 paperEval = ['bedroom_0026_914',
 'bedroom_0032_935',
