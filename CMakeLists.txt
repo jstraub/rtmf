@@ -87,10 +87,15 @@ pods_use_pkg_config_packages(realtimeMF_lcm
     )
 
 
-install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
-          FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
-          FILES_MATCHING PATTERN "*.hpp")
+#install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
+#          FILES_MATCHING PATTERN "*.h")
+#install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
+#          FILES_MATCHING PATTERN "*.hpp")
 
 pods_install_executables(realtimeMF realtimeMF_lcm)
-#pods_install_headers(DIRECTORY include/rtmf/ DESTINATION include/rtmf/ FILES_MATCHING PATTERN "*.hpp")
+pods_install_headers(
+  ./include/rtmf/realtimeMF_lcm.hpp
+  ./include/rtmf/rtmf.hpp
+  ./include/rtmf/realtimeMF_openni.hpp
+  ./include/rtmf/jpeg-utils-ijg.h
+  DESTINATION rtmf)
