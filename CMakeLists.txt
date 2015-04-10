@@ -44,9 +44,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-g -Wall -Wno-deprecated -O2 -finline-functions -DN
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Wno-deprecated")
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=\"sm_35,compute_35\")
 
-message( ${Boost_INCLUDE_DIRS} )
-message( ${Boost_LIBRARY_DIRS} )
-
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIR}
@@ -75,6 +72,11 @@ if(NOT DRC)
     ${PCL_LIBRARY_DIRS}
     )
 endif()
+
+message( ${Boost_INCLUDE_DIRS} )
+message( ${Boost_LIBRARY_DIRS} )
+message( ${OpenCV_INCLUDE_DIRS} )
+message( ${OpenCV_LIBRARIES} )
 
 if(OPENNI)
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
