@@ -65,6 +65,8 @@ protected:
       normalExtract_->uncompressCpu(optSO3_->z().data(),
           optSO3_->z().rows(), z_.data(), z_.rows());
     };
+
+    virtual void scaleDirColors(uint32_t K);
 };
 
 // ------------------- impl --------------------------------------
@@ -76,14 +78,6 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
   mode_(mode), optSO3_(NULL),
   cRmf_(MatrixXf::Identity(3,3))
 {
-  dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);
-  dirCols_ << 255,0,0,
-              255,0,0,
-              0,255,0,
-              0,255,0,
-              0,0,255,
-              0,0,255;
-  this->K_=6;
   cout<<"inititalizing optSO3"<<endl
     <<"  mode = "<<mode_<<endl
     <<"  sigma = "<<cfg.sigma<<endl
@@ -141,3 +135,14 @@ MatrixXf RealtimeMF::mfAxes()
   return mfAx;
 };
 
+void RealtimeMF::scaleDirColors(uint32_t K)
+{
+  this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);
+  this->dirCols_ << 255,0,0,
+              255,0,0,
+              0,255,0,
+              0,255,0,
+              0,0,255,
+              0,0,255;
+  this->K_=6;
+}

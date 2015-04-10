@@ -24,12 +24,15 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "default install path" FORCE )
 endif()
 
+set(LCM OFF)
+set(DRC OFF)
+set(OPENNI ON)
+
 find_package (Eigen3 REQUIRED)
+find_package (VTK REQUIRED)
 find_package (CUDA REQUIRED)
-find_package (OpenCV REQUIRED)
-find_package (PCL REQUIRED)
 FIND_PACKAGE (Boost 1.54 REQUIRED)
-FIND_PACKAGE (OpenMP)
+#FIND_PACKAGE (OpenMP)
 
 if (OPENMP_FOUND)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -43,36 +46,57 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20 -genc
 
 message( ${Boost_INCLUDE_DIRS} )
 message( ${Boost_LIBRARY_DIRS} )
-message( ${OpenCV_INCLUDE_DIRS} )
 
 include_directories(
   include
-  ${PCL_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
-#  /home/jstraub/workspace/research/drc/software/build/include
+  ${CUDA_TOOLKIT_INCLUDE}
+  ${VTK_INCLUDE_DIRS}
 )
 
 link_directories(
-  ${PCL_LIBRARY_DIRS}
   ${Boost_LIBRARY_DIRS}
 )
 
-cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
-  )
-target_link_libraries (realtimeMF
-  jsCore cudaPcl mmf
-  boost_system boost_thread boost_program_options
-  pcl_common pcl_io pcl_visualization pcl_filters pcl_features
-  pcl_search
-  ${OpenCV_LIBS}
-#  opencv_core opencv_highgui opencv_imgproc
-#  opencv_contrib
-  )
+if(NOT DRC)
+  find_package (OpenCV REQUIRED)
+  find_package (PCL REQUIRED)
+  message(${OpenCV_LIBS})
+  message(${OpenCV_INCLUDE_DIRS})
+  message(${PCL_INCLUDE_DIRS})
 
-set(LCM OFF)
-if(LCM)
+  include_directories(
+    ${PCL_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+    )
+
+  link_directories(
+    ${PCL_LIBRARY_DIRS}
+    )
+endif()
+
+if(OPENNI)
+  cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
+    )
+  target_link_libraries (realtimeMF
+    jsCore cudaPcl mmf
+    boost_system boost_thread boost_program_options
+    pcl_common pcl_io pcl_visualization pcl_filters pcl_features
+    pcl_search
+    ${OpenCV_LIBS}
+  #  opencv_core opencv_highgui opencv_imgproc
+  #  opencv_contrib
+    )
+  pods_install_executables(realtimeMF)
+  pods_install_headers(
+    ./include/rtmf/rtmf.hpp
+    ./include/rtmf/realtimeMF_openni.hpp
+    ./include/rtmf/jpeg-utils-ijg.h
+    DESTINATION rtmf)
+endif()
+
+if(LCM OR DRC)
 
   cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
     ./src/jpeg-utils-ijg.c
@@ -97,6 +121,9 @@ if(LCM)
   pods_install_executables(realtimeMF_lcm)
   pods_install_headers(
     ./include/rtmf/realtimeMF_lcm.hpp
+    ./include/rtmf/rtmf.hpp
+    ./include/rtmf/realtimeMF_openni.hpp
+    ./include/rtmf/jpeg-utils-ijg.h
   DESTINATION rtmf)
 endif()
 
@@ -105,9 +132,3 @@ endif()
 #install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
 #          FILES_MATCHING PATTERN "*.hpp")
 
-pods_install_executables(realtimeMF)
-pods_install_headers(
-  ./include/rtmf/rtmf.hpp
-  ./include/rtmf/realtimeMF_openni.hpp
-  ./include/rtmf/jpeg-utils-ijg.h
-  DESTINATION rtmf)
