@@ -13,7 +13,8 @@
 #include <lcmtypes/kinect_frame_msg_t.h>
 
 //#include <bot_param/param_client.h>
-#include <bot_frames_cpp/bot_frames_cpp.hpp>
+#include <lcmtypes/bot_core/image_t.hpp>
+#include <lcmtypes/bot_core/images_t.hpp>
 
 #include <rtmf/rtmf.hpp>
 #include <rtmf/jpeg-utils-ijg.h>

@@ -34,7 +34,7 @@ main:
     echo "-------------------------------------------"; \
     $(MAKE) -C $$subdir all || exit 2; \
   done 
-#	@$(MAKE) -C pod-build all install
+	@$(MAKE) -C pod-build all install
 	@# Place additional commands here if you have any
 
 clean:

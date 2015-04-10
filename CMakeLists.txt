@@ -49,6 +49,7 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+#  /home/jstraub/workspace/research/drc/software/build/include
 )
 
 link_directories(
