@@ -43,12 +43,14 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_20,code=sm_20 -genc
 
 message( ${Boost_INCLUDE_DIRS} )
 message( ${Boost_LIBRARY_DIRS} )
+message( ${OpenCV_INCLUDE_DIRS} )
 
 include_directories(
   include
   ${PCL_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 #  /home/jstraub/workspace/research/drc/software/build/include
 )
 
@@ -64,38 +66,47 @@ target_link_libraries (realtimeMF
   boost_system boost_thread boost_program_options
   pcl_common pcl_io pcl_visualization pcl_filters pcl_features
   pcl_search
-  opencv_core opencv_highgui opencv_imgproc
-  opencv_contrib
+  ${OpenCV_LIBS}
+#  opencv_core opencv_highgui opencv_imgproc
+#  opencv_contrib
   )
 
-cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
-  ./src/jpeg-utils-ijg.c
-  )
-target_link_libraries (realtimeMF_lcm
-  jsCore cudaPcl mmf
-  boost_system boost_thread boost_program_options
-  pcl_common pcl_io pcl_visualization pcl_filters pcl_features
-  pcl_search
-  opencv_core opencv_highgui opencv_imgproc
-  opencv_contrib
-  jpeg z png
-  )
+set(LCM OFF)
+if(LCM)
 
-pods_use_pkg_config_packages(realtimeMF_lcm
-#    glib-2.0
+  cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
+    ./src/jpeg-utils-ijg.c
+    )
+  target_link_libraries (realtimeMF_lcm
+    jsCore cudaPcl mmf
+    boost_system boost_thread boost_program_options
+    pcl_common pcl_io pcl_visualization pcl_filters pcl_features
+    pcl_search
+    #  opencv_core opencv_highgui opencv_imgproc
+    #  opencv_contrib
+    jpeg z png
+    ${OpenCV_LIBS}
+    )
+
+  pods_use_pkg_config_packages(realtimeMF_lcm
+    #    glib-2.0
     lcm
     kinect-utils
     )
 
+  pods_install_executables(realtimeMF_lcm)
+  pods_install_headers(
+    ./include/rtmf/realtimeMF_lcm.hpp
+  DESTINATION rtmf)
+endif()
 
 #install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
 #          FILES_MATCHING PATTERN "*.h")
 #install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
 #          FILES_MATCHING PATTERN "*.hpp")
 
-pods_install_executables(realtimeMF realtimeMF_lcm)
+pods_install_executables(realtimeMF)
 pods_install_headers(
-  ./include/rtmf/realtimeMF_lcm.hpp
   ./include/rtmf/rtmf.hpp
   ./include/rtmf/realtimeMF_openni.hpp
   ./include/rtmf/jpeg-utils-ijg.h

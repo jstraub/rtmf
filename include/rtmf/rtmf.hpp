@@ -43,6 +43,8 @@ public:
   const Matrix3f& cRmf() { return cRmf_;};
 
 protected:
+    const static uint32_t K_MAX = 6;
+
     double residual_, D_KL_;
     uint32_t nCGIter_;
 
@@ -81,6 +83,7 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
               0,255,0,
               0,0,255,
               0,0,255;
+  this->K_=6;
   cout<<"inititalizing optSO3"<<endl
     <<"  mode = "<<mode_<<endl
     <<"  sigma = "<<cfg.sigma<<endl
