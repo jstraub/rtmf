@@ -25,8 +25,8 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 set(LCM OFF)
-set(DRC OFF)
-set(OPENNI ON)
+set(DRC ON)
+set(OPENNI OFF)
 
 find_package (Eigen3 REQUIRED)
 find_package (VTK REQUIRED)
@@ -73,10 +73,6 @@ if(NOT DRC)
     )
 endif()
 
-message( ${Boost_INCLUDE_DIRS} )
-message( ${Boost_LIBRARY_DIRS} )
-message( ${OpenCV_INCLUDE_DIRS} )
-message( ${OpenCV_LIBRARIES} )
 
 if(OPENNI)
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
@@ -105,13 +101,14 @@ if(LCM OR DRC)
     )
   target_link_libraries (realtimeMF_lcm
     jsCore cudaPcl mmf
+  multisense_image_utils
     boost_system boost_thread boost_program_options
     pcl_common pcl_io pcl_visualization pcl_filters pcl_features
     pcl_search
-    #  opencv_core opencv_highgui opencv_imgproc
-    #  opencv_contrib
+    opencv_core opencv_highgui opencv_imgproc
+    opencv_contrib
+    opencv_calib3d
     jpeg z png
-    ${OpenCV_LIBS}
     )
 
   pods_use_pkg_config_packages(realtimeMF_lcm

@@ -6,6 +6,10 @@
 #include <zlib.h>
 #include <glib.h>
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <lcm/lcm-cpp.hpp>
 
 #include "lcmtypes/kinect.hpp"
@@ -16,8 +20,11 @@
 #include <lcmtypes/bot_core/image_t.hpp>
 #include <lcmtypes/bot_core/images_t.hpp>
 
+#include <multisense_image_utils/multisense_image_utils.hpp>
+
 #include <rtmf/rtmf.hpp>
 #include <rtmf/jpeg-utils-ijg.h>
+#include <cudaPcl/cv_helpers.hpp>
 
 class RealtimeMF_lcm
 {
@@ -43,19 +50,24 @@ class RealtimeMF_lcm
    cv::Mat rgb_;
    cv::Mat d_;
 
+    multisense_image_utils miu_;
 };
 
 
 RealtimeMF_lcm::RealtimeMF_lcm(shared_ptr<lcm::LCM>& lcm,
-    shared_ptr<RealtimeMF>& pRtmf, string outPath)
+    shared_ptr<RealtimeMF>& pRtmf, 
+    string channel,
+    string outPath)
   : lcm_(lcm), pRtmf_(pRtmf), outPath_(outPath)
 {
-  if(channel.compre("KINECT_FRAME") == 0)
+  if(channel.compare("KINECT_FRAME") == 0)
     lcm_->subscribe( "KINECT_FRAME",&RealtimeMF_lcm::rgbd_cb,this);
-  else if(channel.compre("CAMERA") == 0)
+  else if(channel.compare("CAMERA") == 0)
     lcm_->subscribe( "CAMERA",&RealtimeMF_lcm::disparity_cb,this);
   else
     cout<<"channel "<<channel<<" unkown!!"<<endl;
+  cout<<"connected to channel "<<channel<<endl;
+  
 };
 
 RealtimeMF_lcm::~RealtimeMF_lcm()
@@ -114,76 +126,114 @@ void RealtimeMF_lcm::rgbd_cb(const lcm::ReceiveBuffer* rbuf, const
 void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
     string& channel, const  bot_core::images_t* msg)
 {
-  cout<<"multisense @"<<msg->images.utime<<" #imgs "<<msg->n_images<<endl;
+  cout<<"multisense @"<<" #imgs "<<msg->n_images<<endl;
 
-  if (msg->images[0].pixelformat == BOT_CORE_IMAGE_T_PIXEL_FORMAT_RGB ){
-    rgb_buf_ = msg->images[0].data;
+  if (msg->images[0].pixelformat == bot_core::image_t::PIXEL_FORMAT_RGB ){
+    cout<<"rgb image"<<endl;
+//    rgb_buf_ = msg->images[0].data;
     rgb_ = cv::Mat(msg->images[0].height, msg->images[0].width, CV_8UC3);
-    memcpy(rgb_.data, &(msg->images[0].image_data[0]),
+    memcpy(rgb_.data, &(msg->images[0].data[0]),
         msg->images[0].width * msg->images[0].height * 3);
-  }else if (msg->images[0].pixelformat == BOT_CORE_IMAGE_T_PIXEL_FORMAT_GRAY ){
+  }else if (msg->images[0].pixelformat == bot_core::image_t::PIXEL_FORMAT_GRAY ){
+    cout<<"gray image"<<endl;
     cv::Mat gray = cv::Mat(msg->images[0].height, msg->images[0].width,
         CV_8UC1);
-    memcpy(gray.data, &(msg->images[0].image_data[0]),
+    memcpy(gray.data, &(msg->images[0].data[0]),
         msg->images[0].width * msg->images[0].height);
-  }else if (msg->images[0].pixelformat == BOT_CORE_IMAGE_T_PIXEL_FORMAT_MJPEG ){
-    jpegijg_decompress_8u_rgb (&(msg->images[0].image_data[0]),
+  }else if (msg->images[0].pixelformat == bot_core::image_t::PIXEL_FORMAT_MJPEG ){
+    cout<<"jpeg image "<<msg->images[0].size<<" "<< msg->images[0].width <<" "<<msg->images[0].height<<endl;
+    rgb_ = cv::Mat(msg->images[0].height, msg->images[0].width, CV_8UC3);
+    jpegijg_decompress_8u_rgb ( &(msg->images[0].data[0]),
           msg->images[0].size, rgb_.data, msg->images[0].width,
-          msg->images[0].height, msg->image[0].width * 3);
+          msg->images[0].height, msg->images[0].width * 3);
   }else{
     std::cout << "multisense_utils::unpack_multisense | type not understood\n";
     exit(-1);
   }
-//
-//  // TODO: support other modes (as in the renderer)
-//  if (msg->image_types[1] == BOT_CORE_IMAGES_T_DISPARITY_ZIPPED ) {
-//    unsigned long dlen = msg->images[0].width*msg->images[0].height*2 ;//msg->depth.uncompressed_size;
-//    d_ = cv::Mat(msg->images[1].height, msg->images[1].width, CV_16SC1);
-//    uncompress(d_.data , &dlen, msg->images[1].data, msg->images[1].size);
-//  } else{
-//    std::cout << "multisense_utils::unpack_multisense | depth type not understood\n";
-//    exit(-1);
-//  }  
-//
-//    // Remove disconnect components. TODO: if needed this can also be
-//    // used for the depth data
-//    if (size_threshold_ > 0){
-//      // Distance threshold conversion:
-//      float k00 = 1/repro_matrix(2,3);
-//      float baseline = 1/repro_matrix(3,2);
-//      float mDisparityFactor = 1/k00/baseline;
-//      float thresh = 16.0/mDisparityFactor/depth_threshold_;
-//      miu_.removeSmall(disparity_orig_temp, thresh, size_threshold_);
-//    }
-//
-//    //std::copy(msg->images[1].data.data()             , msg->images[1].data.data() + (msg->images[1].size) ,
-//    //          disparity_orig_temp.data);
-//
-//    // disparity_orig_temp.data = msg->images[1].data.data();   // ... is a simple assignment possible?
+  cv::imshow("rgb",rgb_);
+
+  // TODO: support other modes (as in the renderer)
+  if (msg->image_types[1] == bot_core::images_t::DISPARITY_ZIPPED ) {
+    cout<<"zipped depth"<<endl;
+    unsigned long dlen = msg->images[1].width*msg->images[1].height*2 ;//msg->depth.uncompressed_size;
+    d_ = cv::Mat(msg->images[1].height, msg->images[1].width, CV_16SC1);
+    uncompress(d_.data , &dlen, &(msg->images[1].data[0]), msg->images[1].size);
+  } else{
+    std::cout << "multisense_utils::unpack_multisense | depth type not understood\n";
+    exit(-1);
+  }  
+//  cv::imshow("d",d_);
+
+  uint32_t h = msg->images[1].height;
+  uint32_t w = msg->images[1].width;
+
+  float decimate_ =32.0;
+  float size_threshold_ = 1000; // in pixels
+  float depth_threshold_ = 1000.0; // in m
+
+  float repro[16] =  {1, 0, 0, -512.5, 0, 1, 0, -272.5, 0, 0, 0, 606.034, 0, 0, 14.2914745276283, 0};
+  cv::Mat_<float> repro_matrix(4,4,repro);
+
+    // Remove disconnect components. TODO: if needed this can also be
+    // used for the depth data
+    if (size_threshold_ > 0){
+      // Distance threshold conversion:
+      float k00 = 1/repro_matrix(2,3);
+      float baseline = 1/repro_matrix(3,2);
+      float mDisparityFactor = 1/k00/baseline;
+      float thresh = 16.0/mDisparityFactor/depth_threshold_;
+      miu_.removeSmall(d_, thresh, size_threshold_);
+    }
+
+    //std::copy(msg->images[1].data.data()             , msg->images[1].data.data() + (msg->images[1].size) ,
+    //          disparity_orig_temp.data);
+
+    // disparity_orig_temp.data = msg->images[1].data.data();   // ... is a simple assignment possible?
 //    cv::Mat_<float> disparity_orig(h, w);
 //    disparity_orig = disparity_orig_temp;
 //
 //    disparity_buf_.resize(h * w);
-//    cv::Mat_<float> disparity(h, w, &(disparity_buf_[0]));
-//    disparity = disparity_orig / 16.0;
-//
-//    // Allocate buffer for reprojection output
+
+    cv::Mat_<float> disparity(h, w);
+//    d_.convertTo(disparity,CV_32F,1./16.);
+    disparity = d_;
+    disparity = disparity/16.0;
+
+    // Allocate buffer for reprojection output
 //    points_buf_.resize(h * w);
-//    cv::Mat_<cv::Vec3f> points(h, w, &(points_buf_[0]));
-//
-//    // Do the reprojection in open space
-//    static const bool handle_missing_values = true;
-//    cv::reprojectImageTo3D(disparity, points, repro_matrix, handle_missing_values);
+    cv::Mat_<cv::Vec3f> points(h, w);
+
+    // Do the reprojection in open space
+    static const bool handle_missing_values = true;
+    cv::reprojectImageTo3D(disparity, points, repro_matrix, handle_missing_values);
+    std::vector<cv::Mat> xyz;
+    cv::split(points,xyz);
+
+  double min,max;
+//  cv::minMaxLoc(xyz[2],&min,&max);
+//  cout<<"min value: "<<min<<" max "<<max<<endl;
+//  cv::imshow("z",xyz[2]); cv::Mat zz; xyz[2].copyTo(zz);
+//  showNans(zz); cv::imshow("nan",zz);
+//  cv::imshow("small",xyz[2]>=(max-10.));
+  cv::Mat Z;
+  xyz[2].copyTo(Z,xyz[2]<(max-10.));
+  cv::imshow("z",Z);
+  cv::waitKey(0);
+  cv::minMaxLoc(Z,&min,&max);
+  cout<<"min value: "<<min<<" max "<<max<<endl;
 //
 ////  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
 ////      new pcl::PointCloud<pcl::PointXYZRGB>);
 ////  ms_utils_->unpack_multisense(msg,Q_,cloud);  
 //
-//  pRtmf_->compute(d_);
+//
+  Z = Z*1000.; // because code expects it in mm
+  pRtmf_->compute(Z);
 ////  this->update();
 ////  cout<<pRtmf_->cRmf()<<endl;
 ////
-// visualizeNormals(); cv::waitKey(10);
+ visualizeNormals(); 
+ cv::waitKey(10);
 }
 
 void RealtimeMF_lcm::visualizeNormals()
@@ -192,6 +242,10 @@ void RealtimeMF_lcm::visualizeNormals()
   cout<<"visualize Normals"<<endl;
   cv::Mat Iseg = pRtmf_->overlaySeg(this->rgb_);
   cv::imshow("seg",Iseg);
+  cv::Mat n = pRtmf_->normalsImg();
+  cv::Mat d = pRtmf_->smoothDepthImg();
+  cv::imshow("dS",d);
+  cv::imshow("nS",n);
   if (outPath_.compare("") != 0)
   {
     stringstream ss;

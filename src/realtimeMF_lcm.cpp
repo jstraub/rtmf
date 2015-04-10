@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
   cfgOptSO3.sigma = 5.0f*M_PI/180.0;
   if(vm.count("mode")) mode = vm["mode"].as<string>();
   if(vm.count("out")) outPath = vm["out"].as<string>();
-  if(vm.count("out")) channel = vm["channel"].as<string>();
+  if(vm.count("channel")) channel = vm["channel"].as<string>();
   if(vm.count("eps")) cfgNormals.eps = vm["eps"].as<float>();
   if(vm.count("f_d")) cfgNormals.f_d = vm["f_d"].as<float>();
   if(vm.count("B")) cfgNormals.B = uint32_t( vm["B"].as<int>());
