@@ -162,7 +162,6 @@ void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
     std::cout << "multisense_utils::unpack_multisense | depth type not understood\n";
     exit(-1);
   }  
-//  cv::imshow("d",d_);
 
   uint32_t h = msg->images[1].height;
   uint32_t w = msg->images[1].width;
@@ -171,6 +170,7 @@ void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
   float size_threshold_ = 1000; // in pixels
   float depth_threshold_ = 1000.0; // in m
 
+  //TODO
   float repro[16] =  {1, 0, 0, -512.5, 0, 1, 0, -272.5, 0, 0, 0, 606.034, 0, 0, 14.2914745276283, 0};
   cv::Mat_<float> repro_matrix(4,4,repro);
 
@@ -184,6 +184,7 @@ void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
       float thresh = 16.0/mDisparityFactor/depth_threshold_;
       miu_.removeSmall(d_, thresh, size_threshold_);
     }
+//  cv::imshow("d",d_);
 
     //std::copy(msg->images[1].data.data()             , msg->images[1].data.data() + (msg->images[1].size) ,
     //          disparity_orig_temp.data);
@@ -210,15 +211,16 @@ void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
     cv::split(points,xyz);
 
   double min,max;
-//  cv::minMaxLoc(xyz[2],&min,&max);
+  cv::minMaxLoc(xyz[2],&min,&max);
 //  cout<<"min value: "<<min<<" max "<<max<<endl;
 //  cv::imshow("z",xyz[2]); cv::Mat zz; xyz[2].copyTo(zz);
 //  showNans(zz); cv::imshow("nan",zz);
 //  cv::imshow("small",xyz[2]>=(max-10.));
   cv::Mat Z;
   xyz[2].copyTo(Z,xyz[2]<(max-10.));
-  cv::imshow("z",Z);
-  cv::waitKey(0);
+//  xyz[2].copyTo(Z);
+//  cv::imshow("z",Z);
+//  cv::waitKey(0);
   cv::minMaxLoc(Z,&min,&max);
   cout<<"min value: "<<min<<" max "<<max<<endl;
 //
@@ -226,7 +228,7 @@ void RealtimeMF_lcm::disparity_cb(const lcm::ReceiveBuffer* rbuf, const
 ////      new pcl::PointCloud<pcl::PointXYZRGB>);
 ////  ms_utils_->unpack_multisense(msg,Q_,cloud);  
 //
-//
+
   Z = Z*1000.; // because code expects it in mm
   pRtmf_->compute(Z);
 ////  this->update();
