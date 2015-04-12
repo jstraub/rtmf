@@ -71,8 +71,12 @@ if(NOT DRC)
   link_directories(
     ${PCL_LIBRARY_DIRS}
     )
+message( ${OpenCV_INCLUDE_DIRS} )
+message( ${OpenCV_LIBRARIES} )
 endif()
 
+message( ${Boost_INCLUDE_DIRS} )
+message( ${Boost_LIBRARY_DIRS} )
 
 if(OPENNI)
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
