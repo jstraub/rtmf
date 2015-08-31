@@ -25,8 +25,8 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 set(LCM OFF)
-set(DRC ON)
-set(OPENNI OFF)
+set(DRC OFF)
+set(OPENNI ON)
 
 find_package (Eigen3 REQUIRED)
 find_package (VTK REQUIRED)
@@ -71,8 +71,8 @@ if(NOT DRC)
   link_directories(
     ${PCL_LIBRARY_DIRS}
     )
-message( ${OpenCV_INCLUDE_DIRS} )
-message( ${OpenCV_LIBRARIES} )
+  message( ${OpenCV_INCLUDE_DIRS} )
+  message( ${OpenCV_LIBRARIES} )
 endif()
 
 message( ${Boost_INCLUDE_DIRS} )
@@ -82,19 +82,20 @@ if(OPENNI)
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
     )
   target_link_libraries (realtimeMF
-    jsCore cudaPcl mmf
+    jsCore mmf cudaPcl
     boost_system boost_thread boost_program_options
     pcl_common pcl_io pcl_visualization pcl_filters pcl_features
     pcl_search
-    ${OpenCV_LIBS}
-  #  opencv_core opencv_highgui opencv_imgproc
-  #  opencv_contrib
+    OpenNI XnVNite_1_5_2 
+     vtkCommon vtkFiltering vtkRendering vtkGraphics 
+#    ${OpenCV_LIBS}
+    opencv_core opencv_highgui opencv_imgproc
+    opencv_contrib
     )
   pods_install_executables(realtimeMF)
   pods_install_headers(
     ./include/rtmf/rtmf.hpp
     ./include/rtmf/realtimeMF_openni.hpp
-    ./include/rtmf/jpeg-utils-ijg.h
     DESTINATION rtmf)
 endif()
 
@@ -118,7 +119,7 @@ if(LCM OR DRC)
   pods_use_pkg_config_packages(realtimeMF_lcm
     #    glib-2.0
     lcm
-    kinect-utils
+#    kinect-utils
     )
 
   pods_install_executables(realtimeMF_lcm)

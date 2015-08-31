@@ -11,11 +11,9 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include <lcm/lcm-cpp.hpp>
-
 #include "lcmtypes/kinect.hpp"
 #include <lcmtypes/kinect_depth_msg_t.h>
 #include <lcmtypes/kinect_frame_msg_t.h>
-
 //#include <bot_param/param_client.h>
 #include <lcmtypes/bot_core/image_t.hpp>
 #include <lcmtypes/bot_core/images_t.hpp>
