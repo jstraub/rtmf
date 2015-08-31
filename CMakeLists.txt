@@ -57,6 +57,7 @@ link_directories(
 )
 
 if(NOT DRC)
+  message("-- compiling for OpenCV")
   find_package (OpenCV REQUIRED)
   find_package (PCL REQUIRED)
   message(${OpenCV_LIBS})
@@ -69,18 +70,14 @@ if(NOT DRC)
     )
 
   link_directories(
-    /usr/lib/
     ${PCL_LIBRARY_DIRS}
     ${OpenCV_LIBRARIES} 
     )
-  message( ${OpenCV_INCLUDE_DIRS} )
-  message( ${OpenCV_LIBRARIES} )
+
 endif()
 
-message( ${Boost_INCLUDE_DIRS} )
-message( ${Boost_LIBRARY_DIRS} )
-
 if(OPENNI)
+  message("-- compiling for OpenNI")
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
     )
   target_link_libraries (realtimeMF
@@ -90,7 +87,6 @@ if(OPENNI)
     pcl_search
     OpenNI XnVNite_1_5_2 
      vtkCommon vtkFiltering vtkRendering vtkGraphics 
-#    ${OpenCV_LIBS}
     opencv_core opencv_highgui opencv_imgproc
     opencv_contrib
     )
@@ -102,7 +98,7 @@ if(OPENNI)
 endif()
 
 if(LCM OR DRC)
-
+  message("-- compiling for LCM or DRC")
   cuda_add_executable(realtimeMF_lcm ./src/realtimeMF_lcm.cpp
     ./src/jpeg-utils-ijg.c
     )
@@ -119,9 +115,7 @@ if(LCM OR DRC)
     )
 
   pods_use_pkg_config_packages(realtimeMF_lcm
-    #    glib-2.0
     lcm
-#    kinect-utils
     )
 
   pods_install_executables(realtimeMF_lcm)
@@ -132,9 +126,3 @@ if(LCM OR DRC)
     ./include/rtmf/jpeg-utils-ijg.h
   DESTINATION rtmf)
 endif()
-
-#install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
-#          FILES_MATCHING PATTERN "*.h")
-#install(DIRECTORY include/rtmf/ DESTINATION include/rtmf/
-#          FILES_MATCHING PATTERN "*.hpp")
-
