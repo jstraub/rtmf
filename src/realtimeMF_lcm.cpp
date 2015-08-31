@@ -75,6 +75,13 @@ int main(int argc, char ** argv) {
     cfgOptSO3.tMax = 5.f;
     cfgOptSO3.dt = 0.05f;
   }
+  if(channel.compare("CAMERA"))
+  {
+  // from drc/software/config/config_components/multisense_02.cfg 
+  //
+  // multisense stereo camera
+    cfgNormals.f_d = 591.909423828125;
+  };
 
   if(vm.count("tMax")) cfgOptSO3.tMax  = vm["tMax"].as<float>();
   if(vm.count("dt")) cfgOptSO3.dt = vm["dt"].as<float>();
