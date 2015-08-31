@@ -1,6 +1,8 @@
 This code extracts the local Manhattan World rotation and segmentation from
 depth images in real-time.
 
+[![Real-time Manhattan Frame Rotation Estimation and Segmentation](./doc/rtmfVideoPreview.png)](https://youtu.be/5pFEEquUYd8) 
+
 If you are using this code for your research please cite
 ```
 Real-time Manhattan World Rotation Estimation in 3D (Julian Straub,
