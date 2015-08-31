@@ -1,6 +1,6 @@
 This code extracts the local Manhattan World rotation and segmentation from
-depth images in real-time.
-
+depth images in real-time. Here is a demo video for three different
+RGB-D sequences:
 [![Real-time Manhattan Frame Rotation Estimation and Segmentation](./doc/rtmfVideoPreviewYoutube.png)](https://youtu.be/5pFEEquUYd8) 
 
 If you are using this code for your research please cite
@@ -28,7 +28,7 @@ Once you have those dependencies in place run
 ```
 make checkout && make configure && make 
 ```
-This will checkout dependencies from some of my other repos and compile
+This will checkout dependencies from some of my other repositories ([jsCore](https://github.com/jstraub/jsCore), [mmf](https://github.com/jstraub/mmf), [cudePcl](https://github.com/jstraub/cudaPcl)) and compile
 everything to ./build/
 
 ### Library
