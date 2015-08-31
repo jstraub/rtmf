@@ -69,7 +69,9 @@ if(NOT DRC)
     )
 
   link_directories(
+    /usr/lib/
     ${PCL_LIBRARY_DIRS}
+    ${OpenCV_LIBRARIES} 
     )
   message( ${OpenCV_INCLUDE_DIRS} )
   message( ${OpenCV_LIBRARIES} )

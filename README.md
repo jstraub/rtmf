@@ -3,7 +3,8 @@ depth images in real-time.
 
 If you are using this code for your research please cite
 ```
-
+Real-time Manhattan World Rotation Estimation in 3D (Julian Straub,
+Nishchal Bhandari, John J. Leonard, John W. Fisher III), In IROS, 2015.
 ```
 
 ### Dependencies

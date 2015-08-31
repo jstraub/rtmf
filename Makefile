@@ -62,21 +62,17 @@ configure:
 	@cd pod-build && cmake -DCMAKE_INSTALL_PREFIX=$(BUILD_PREFIX) \
 		   -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
 
-
 checkout:
 	git clone git@github.com:jstraub/jsCore.git
 	git clone git@github.com:jstraub/cudaPcl.git
 	git clone git@github.com:jstraub/mmf.git
-	svn co https://svn.csail.mit.edu/rrg_pods/drivers/kinect
-#	git clone /data/vision/fisher/code/jstraub/gitrep/research/jsCore.git/
-#	git clone /data/vision/fisher/code/jstraub/gitrep/research/cudaPcl.git/
-#	git clone /data/vision/fisher/code/jstraub/gitrep/research/mmf.git/
+#	svn co https://svn.csail.mit.edu/rrg_pods/drivers/kinect
 
 update:
 	cd cudaPcl; git pull; cd -
 	cd mmf; git pull; cd -
 	cd jsCore; git pull; cd -
-	cd kinect; svn up; cd -
+#	cd kinect; svn up; cd -
 
 # other (custom) targets are passed through to the cmake-generated Makefile
 %::
