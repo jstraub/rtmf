@@ -42,6 +42,9 @@ public:
   MatrixXf mfAxes();
   const Matrix3f& cRmf() { return cRmf_;};
 
+    cv::Mat normalsImg_;
+
+
 protected:
     const static uint32_t K_MAX = 6;
 
@@ -53,6 +56,7 @@ protected:
 
     mmf::OptSO3 * optSO3_;
     Matrix3f cRmf_;
+
 
     /*
      * runs the actual compute; assumes that normalExtract_ contains
@@ -110,6 +114,7 @@ void RealtimeMF::compute_()
   int32_t nComp = 0;
   float* d_nComp = normalExtract_->d_normalsComp(nComp);
   cout<<" -- compressed to "<<nComp<<" normals"<<endl;
+//      normalsImg_ = normalExtract_->normalsImg();
   // optimize normals
   tLog_.toc(2); // total time
   optSO3_->updateExternalGpuNormals(d_nComp,nComp,3,0);
