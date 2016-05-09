@@ -8,7 +8,7 @@ import numpy as np
 import scipy.io
 import subprocess as subp
 
-import os, re, time
+import os, re, time, random
 import argparse
 
 #from vpCluster.rgbd.rgbdframe import RgbdFrame
@@ -18,10 +18,12 @@ import argparse
 
 def run(cfg,reRun):
   #args = ['../build/dpSubclusterSphereGMM',
-#  args = ['../build/dpStickGMM',
-  args = ['../build/realtimeMF_files',
+  #args = ['../build/dpStickGMM',
+  print 'processing '+cfg['dataPath']+cfg['filePath']
+  print "output to "+cfg['outName']
+  args = ['../pod-build/bin/realtimeMF',
     '--mode '+cfg['mode'],
-    '-i {}'.format(cfg['rootPath']+cfg['dataPath']+"_d.png"),
+    '-i {}'.format(cfg['dataPath']+cfg['filePath']+"_d.png"),
     '-o {}'.format(cfg['outName']),
     '-B {}'.format(5),
     '-T {}'.format(30),
@@ -33,7 +35,7 @@ def run(cfg,reRun):
   if 'nCGIter' in cfg.keys():
     args.append('--nCGIter {}'.format(cfg['nCGIter']))
 
-  if reRun:
+  if reRun or not os.path.isfile(cfg['outName']+".csv"):
     print ' '.join(args)
     print ' --------------------- '
     time.sleep(1)
@@ -54,20 +56,14 @@ def config2Str(cfg):
   return st
 
 parser = argparse.ArgumentParser(description = 'rtmf extraction for NYU')
-parser.add_argument('-s','--start', type=int, default=0, 
-    help='start image Nr')
-parser.add_argument('-e','--end', type=int, default=1449, 
-    help='end image Nr')
 parser.add_argument('-m','--mode', default='vmf', 
     help='vmf, approx, direct')
-parser.add_argument('-nyu', action='store_true', 
-    help='switch to process the NYU dataset')
 args = parser.parse_args()
 
 cfg=dict()
-cfg['rootPath'] = '/data/vision/fisher/data1/nyu_depth_v2/extracted/'
-cfg['outputPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu2/'
 cfg['mode'] = args.mode;
+cfg['resultsPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu/'
+cfg['dataPath'] = "/data/vision/fisher/data1/nyu_depth_v2/extracted/"
 
 # for eval of the high quality results of the direct method
 cfg['nCGIter'] = 25
@@ -76,59 +72,32 @@ cfg['tMax'] = 5.0
 
 mode = ['multiFromFile']
 
-reRun = True
+reRun = False
 printCmd = True
 onlyPaperEval = True
 
-paperEval = ['bedroom_0026_914',
-'bedroom_0032_935',
-'bedroom_0043_959',
-'conference_room_0002_342',
-'dining_room_0030_1422',
-'kitchen_0004_1',
-'kitchen_0004_2',
-'kitchen_0007_131',
-'kitchen_0011_143',
-'kitchen_0024_774',
-'kitchen_0024_776',
-'kitchen_0045_865',
-'kitchen_0046_870',
-'kitchen_0057_567',
-'office_0008_15',
-'office_0008_17',
-'office_0009_19',
-'office_0022_618',
-'office_0022_619',
-'office_0027_635',
-'office_0027_638',
-'office_kitchen_0001_409']
+paperEval = ['bedroom_0026_914', 'bedroom_0032_935',
+'bedroom_0043_959', 'conference_room_0002_342',
+'dining_room_0030_1422', 'kitchen_0004_1', 'kitchen_0004_2',
+'kitchen_0007_131', 'kitchen_0011_143', 'kitchen_0024_774',
+'kitchen_0024_776', 'kitchen_0045_865', 'kitchen_0046_870',
+'kitchen_0057_567', 'office_0008_15', 'office_0008_17',
+'office_0009_19', 'office_0022_618', 'office_0022_619',
+'office_0027_635', 'office_0027_638', 'office_kitchen_0001_409']
 
-if not args.nyu:
-  print "only NYU supported now"
-  exit(1)
+names = []
+for root, dirs, files in os.walk(cfg["dataPath"]):
+  for file in files:
+    name,ending = os.path.splitext(file)
+    if ending == '.png' and not re.search("_rgb",name) is None:
+      names.append(re.sub("_rgb","",name))
+  break
+random.shuffle(names)
 
-cfg['evalStart'] = args.start
-cfg['evalEnd'] = args.end
-indexPath = '/data/vision/fisher/data1/nyu_depth_v2/index.txt'
-cfg['rootPath'] = '/data/vision/fisher/data1/nyu_depth_v2/extracted/'
-cfg['outputPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu2/'
-
-names =[]
-with open(indexPath) as f:
-  allNames = f.read().splitlines() #readlines()
-for i in range(len(allNames)):
-  if cfg['evalStart'] <= i and i <cfg['evalEnd']:
-    names.append(allNames[i])
-    print '@{}: {}'.format(len(names)-1,names[-1])
-print names
-
-rndInds = range(len(names)) # np.random.permutation(len(names))
-for ind in rndInds:
-  if onlyPaperEval and names[ind] not in paperEval:
-    continue
-      
-  cfg['dataPath'] = names[ind]
-  cfg['outName'] = cfg['outputPath']+cfg['dataPath']+'_'+config2Str(cfg)
-
-  print 'processing '+cfg['rootPath']+cfg['dataPath']
+error = np.zeros((2,len(names)))
+for i,name in enumerate(names):
+  cfg['filePath'] = name
+  cfg['outName'] = cfg['resultsPath']+cfg['filePath']+'_'+config2Str(cfg)
   run(cfg,reRun)
+
+

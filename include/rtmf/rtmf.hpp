@@ -11,6 +11,7 @@
 #include <mmf/optimizationSO3.hpp>
 #include <mmf/optimizationSO3_approx.hpp>
 #include <mmf/optimizationSO3_vmf.hpp>
+#include <mmf/optimizationSO3_vmfCF.hpp>
 
 #include <cudaPcl/dirSeg.hpp>
 
@@ -42,9 +43,7 @@ public:
   MatrixXf mfAxes();
   const Matrix3f& cRmf() { return cRmf_;};
 
-    cv::Mat normalsImg_;
-
-
+  cv::Mat normalsImg_;
 protected:
     const static uint32_t K_MAX = 6;
 
@@ -98,6 +97,8 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
   }else if (mode_.compare("vmf") == 0){
     optSO3_ = new mmf::OptSO3vMF(cfg.sigma,
         cfg.tMax, cfg.dt);
+  }else if (mode_.compare("vmfCF") == 0){
+    optSO3_ = new mmf::OptSO3vMFCF();
   }
 };
 
