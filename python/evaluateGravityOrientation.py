@@ -47,6 +47,7 @@ def ExtractFloorDirection(pathLabelImage, nImg, lFloor=11):
 
 mode = "approx"
 mode = "vmf"
+mode = "vmfCF"
 nyuPath = "/data/vision/fisher/data1/nyu_depth_v2/"
 rtmfPath = "/data/vision/scratch/fisher/jstraub/rtmf/nyu/"
 

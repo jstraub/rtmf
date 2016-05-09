@@ -1,4 +1,5 @@
 jsCore
+manifold
 cudaPcl
 mmf
 #kinect

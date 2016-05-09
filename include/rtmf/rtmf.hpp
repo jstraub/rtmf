@@ -10,6 +10,7 @@
 
 #include <mmf/optimizationSO3.hpp>
 #include <mmf/optimizationSO3_approx.hpp>
+#include <mmf/optimizationSO3_approx_gd.hpp>
 #include <mmf/optimizationSO3_vmf.hpp>
 #include <mmf/optimizationSO3_vmfCF.hpp>
 
@@ -93,6 +94,9 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("approx") == 0){
     optSO3_ = new mmf::OptSO3Approx(cfg.sigma,
+        cfg.tMax, cfg.dt);
+  }else if (mode_.compare("approxGD") == 0){
+    optSO3_ = new mmf::OptSO3ApproxGD(cfg.sigma,
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("vmf") == 0){
     optSO3_ = new mmf::OptSO3vMF(cfg.sigma,
