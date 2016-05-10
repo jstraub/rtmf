@@ -64,14 +64,21 @@ int main (int argc, char** argv)
     cfgOptSO3.nCGIter = 10; // cannot do that many iterations
     cfgOptSO3.tMax = 1.f;
     cfgOptSO3.dt = 0.1f;
+  }else if(mode.compare("directGD") == 0)
+  {
+    cfgOptSO3.nCGIter = 10; // cannot do that many iterations
   }else if (mode.compare("approx") == 0){
     cfgOptSO3.nCGIter = 25;
     cfgOptSO3.tMax = 5.f;
     cfgOptSO3.dt = 0.05f;
+  }else if (mode.compare("approxGD") == 0){
+    cfgOptSO3.nCGIter = 25;
   }else if (mode.compare("vmf") == 0){
     cfgOptSO3.nCGIter = 25;
     cfgOptSO3.tMax = 5.f;
     cfgOptSO3.dt = 0.05f;
+  }else if (mode.compare("vmfCF") == 0){
+    cfgOptSO3.nCGIter = 1;
   }
 
   if(vm.count("tMax")) cfgOptSO3.tMax  = vm["tMax"].as<float>();

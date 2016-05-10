@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <mmf/optimizationSO3.hpp>
+#include <mmf/optimizationSO3_gd.hpp>
 #include <mmf/optimizationSO3_approx.hpp>
 #include <mmf/optimizationSO3_approx_gd.hpp>
 #include <mmf/optimizationSO3_vmf.hpp>
@@ -91,6 +92,9 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
   if(mode_.compare("direct") == 0)
   {
     optSO3_ = new mmf::OptSO3(cfg.sigma, 
+        cfg.tMax, cfg.dt);
+  }else if (mode_.compare("directGD") == 0){
+    optSO3_ = new mmf::OptSO3GD(cfg.sigma,
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("approx") == 0){
     optSO3_ = new mmf::OptSO3Approx(cfg.sigma,
