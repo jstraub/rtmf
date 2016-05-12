@@ -49,12 +49,14 @@ mode = "approx"
 mode = "vmf"
 mode = "vmfCF"
 mode = "approxGD"
+mode = "directGD"
+mode = "direct"
 nyuPath = "/data/vision/fisher/data1/nyu_depth_v2/"
 rtmfPath = "/data/vision/scratch/fisher/jstraub/rtmf/nyu/"
 
-if True  and os.path.isfile("./angularFloorDeviations_rtmf_"+mode+".csv"):
+if False and os.path.isfile("./angularFloorDeviations_rtmf_"+mode+".csv"):
   error = np.loadtxt("./angularFloorDeviations_rtmf_"+mode+".csv")
-  print "nans: ", np.isnan(error[1,:]).sum(), "of", error.size
+  print "nans: ", np.isnan(error[1,:]).sum(), "of", error[1,:].size
   error = error[:,np.logical_not(np.isnan(error[1,:]))]
   print error.shape
   labels = ["unaligned","RTMF "+mode]
