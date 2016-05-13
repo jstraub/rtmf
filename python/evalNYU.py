@@ -35,13 +35,16 @@ def run(cfg,reRun):
   if 'nCGIter' in cfg.keys():
     args.append('--nCGIter {}'.format(cfg['nCGIter']))
 
-  if reRun or not os.path.isfile(cfg['outName']+".csv"):
+  print "checking if " + cfg['outName']+"_cRmf.csv"
+  if reRun or not os.path.isfile(cfg['outName']+"_cRmf.csv"):
     print ' '.join(args)
     print ' --------------------- '
     time.sleep(1)
     err = subp.call(' '.join(args),shell=True)
     if err:
       print 'error when executing'
+  else:
+    print "skipping " + cfg['dataPath']+cfg['filePath']
 #      raw_input()
 #  z = np.loadtxt(cfg['outName']+'.lbl',dtype=int,delimiter=' ')
 #  sil = np.loadtxt(cfg['outName']+'.lbl_measures.csv',delimiter=" ")
