@@ -31,6 +31,17 @@ make checkout && make configure && make
 This will checkout dependencies from some of my other repositories ([jsCore](https://github.com/jstraub/jsCore), [mmf](https://github.com/jstraub/mmf), [cudePcl](https://github.com/jstraub/cudaPcl)) and compile
 everything to ./build/
 
+### Getting started
+
+After installing the library try running the following to infer the MF
+of a simple scene following the Manhattan World assumption:
+```
+./pod-build/bin/realtimeMF -i data/MIT_hallway_1_d.png -o MIT_hallway_1 -d
+```
+There will be a results .csv file with the rotation of the MF and an
+image overlaying the segmentation on top of the gray-scale image of the
+scene.
+
 ### Library
 *libcudaPcl.so* collects all the cuda code into one shared library. The rest
 of the code is in the form of header files.
