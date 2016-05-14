@@ -68,25 +68,17 @@ cfg['mode'] = args.mode;
 cfg['resultsPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu/'
 cfg['dataPath'] = "/data/vision/fisher/data1/nyu_depth_v2/extracted/"
 
+cfg['resultsPath'] = './'
+cfg['dataPath'] = "../data/"
+
 # for eval of the high quality results of the direct method
 cfg['nCGIter'] = 25
 cfg['dt'] = 0.05
 cfg['tMax'] = 5.0
 
-mode = ['multiFromFile']
-
-reRun = False
+reRun = True
 printCmd = True
-onlyPaperEval = True
 
-paperEval = ['bedroom_0026_914', 'bedroom_0032_935',
-'bedroom_0043_959', 'conference_room_0002_342',
-'dining_room_0030_1422', 'kitchen_0004_1', 'kitchen_0004_2',
-'kitchen_0007_131', 'kitchen_0011_143', 'kitchen_0024_774',
-'kitchen_0024_776', 'kitchen_0045_865', 'kitchen_0046_870',
-'kitchen_0057_567', 'office_0008_15', 'office_0008_17',
-'office_0009_19', 'office_0022_618', 'office_0022_619',
-'office_0027_635', 'office_0027_638', 'office_kitchen_0001_409']
 
 names = []
 for root, dirs, files in os.walk(cfg["dataPath"]):

@@ -94,14 +94,12 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
     optSO3_ = new mmf::OptSO3(cfg.sigma, 
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("directGD") == 0){
-    optSO3_ = new mmf::OptSO3GD(cfg.sigma,
-        cfg.tMax, cfg.dt);
+    optSO3_ = new mmf::OptSO3GD();
   }else if (mode_.compare("approx") == 0){
     optSO3_ = new mmf::OptSO3Approx(cfg.sigma,
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("approxGD") == 0){
-    optSO3_ = new mmf::OptSO3ApproxGD(cfg.sigma,
-        cfg.tMax, cfg.dt);
+    optSO3_ = new mmf::OptSO3ApproxGD();
   }else if (mode_.compare("vmf") == 0){
     optSO3_ = new mmf::OptSO3vMF(cfg.sigma,
         cfg.tMax, cfg.dt);
