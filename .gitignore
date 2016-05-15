@@ -4,6 +4,7 @@ mmf
 cudaPcl
 kinect
 pod-build
+manifold
 *~
 *.pyc
 *.csv
