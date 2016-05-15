@@ -14,6 +14,7 @@
 #include <mmf/optimizationSO3_approx_gd.hpp>
 #include <mmf/optimizationSO3_vmf.hpp>
 #include <mmf/optimizationSO3_vmfCF.hpp>
+#include <mmf/optimizationSO3_mmfvmf.hpp>
 
 #include <cudaPcl/dirSeg.hpp>
 
@@ -105,6 +106,8 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
         cfg.tMax, cfg.dt);
   }else if (mode_.compare("vmfCF") == 0){
     optSO3_ = new mmf::OptSO3vMFCF();
+  }else if (mode_.compare("mmfvmf") == 0){
+    optSO3_ = new mmf::OptSO3MMFvMF(3);
   }
 };
 
