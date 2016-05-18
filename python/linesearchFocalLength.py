@@ -82,7 +82,6 @@ cfg['tMax'] = 5.0
 reRun = True
 printCmd = True
 
-
 names = []
 for root, dirs, files in os.walk(cfg["dataPath"]):
   for file in files:
@@ -91,23 +90,29 @@ for root, dirs, files in os.walk(cfg["dataPath"]):
       names.append(re.sub("_rgb","",name))
   break
 random.shuffle(names)
-
-names = names[:10]
+names = names[:100]
 N = 30
-fs = np.linspace(420,660,N)
+fs = np.linspace(380,720,N)
 print fs
 
-error = np.zeros((N,len(names)))
-for i,name in enumerate(names):
-  cfg['filePath'] = name
-  for j,f in enumerate(fs):
-    cfg["f_d"] = f
-    cfg['outName'] = cfg['resultsPath']+cfg['filePath']+'_'+config2Str(cfg)
-    error[j,i] = run(cfg,reRun)
-
-np.savetxt("focalLengthLines.csv", error)
+import os.path
+if False and os.path.isfile("focalLengthLines.csv"):
+  error = np.loadtxt("focalLengthLines.csv")
+else:
+  error = np.zeros((N,len(names)))
+  for i,name in enumerate(names):
+    cfg['filePath'] = name
+    for j,f in enumerate(fs):
+      cfg["f_d"] = f
+      cfg['outName'] = cfg['resultsPath']+cfg['filePath']+'_'+config2Str(cfg)
+      error[j,i] = run(cfg,reRun)
+  np.savetxt("focalLengthLines.csv", error)
 
 plt.figure()
-for j in range(len(names)):
-  plt.plot(fs,error[:,i])
+for i in range(len(names)):
+  plt.plot(fs,error[:,i],label=names[i])
+plt.legend()
+
+plt.figure()
+plt.plot(fs,np.mean(error,axis=1))
 plt.show()
