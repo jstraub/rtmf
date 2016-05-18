@@ -12,3 +12,8 @@ tags
 *.swp
 *.swo
 *.lbl
+*.png
+*.ply
+*.normals
+python/*.txt
+*.log

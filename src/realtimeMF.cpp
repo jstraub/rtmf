@@ -138,12 +138,19 @@ int main (int argc, char** argv)
       cv::imwrite(vm["out"].as<string>()+"_rgbLabels.png",Iout);
       ofstream out((vm["out"].as<string>()+"_cRmf.csv").data(),
           ofstream::out);
-      for(uint32_t i=0; i<3;++i) 
-      {
-        for(uint32_t j=0; j<2;++j) out << pRtmf->cRmf()(i,j)<<" ";
-        out << pRtmf->cRmf()(i,2)<<endl;
+      std::vector<Eigen::Matrix3f> Rs = pRtmf->cRmfs();
+      for(uint32_t i=0; i<3;++i) {
+        for (uint32_t k=0; k<Rs.size(); ++k) {
+          for(uint32_t j=0; j<3;++j) out << Rs[k](i,j)<<" ";
+//          out << Rs[k](i,2);
+        }
+        out << std::endl;
       }
       out.close();
+      ofstream outf((vm["out"].as<string>()+"_f.csv").data(),
+          ofstream::out);
+      outf << pRtmf->cost() << std::endl;
+      outf.close();
     }
 
     if(vm.count("display")) 

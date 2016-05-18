@@ -45,6 +45,8 @@ public:
   virtual MatrixXf centroids(){ return mfAxes();};
   MatrixXf mfAxes();
   const Matrix3f& cRmf() { return cRmf_;};
+  std::vector<Matrix3f> cRmfs() { return cRmfs_;};
+  double cost() { return residual_;};
 
   cv::Mat normalsImg_;
 protected:
@@ -58,6 +60,8 @@ protected:
 
     mmf::OptSO3 * optSO3_;
     Matrix3f cRmf_;
+    std::vector<Eigen::Matrix3f> cRmfs_;
+    double cost_;
 
 
     /*
@@ -129,6 +133,8 @@ void RealtimeMF::compute_()
   tLog_.toc(2); // total time
   optSO3_->updateExternalGpuNormals(d_nComp,nComp,3,0);
   residual_ = optSO3_->conjugateGradientCUDA(cRmf_,nCGIter_);
+  cRmfs_ = optSO3_->GetRs();
+  std::cout << "have " << cRmfs_.size() << " MFs" << std::endl;
   D_KL_ = optSO3_->D_KL_axisUnif();
   cout<<" -- optimized rotation D_KL to unif "<<D_KL_<<endl
     <<cRmf_<<endl;
@@ -141,23 +147,51 @@ void RealtimeMF::compute_()
 
 MatrixXf RealtimeMF::mfAxes()
 {
-  MatrixXf mfAx = MatrixXf::Zero(3,6);
-  for(uint32_t k=0; k<6; ++k){
-    int j = k/2; // which of the rotation columns does this belong to
-    float sign = (- float(k%2) +0.5f)*2.0f; // sign of the axis
-    mfAx.col(k) = sign*cRmf_.col(j);
+  MatrixXf mfAx = MatrixXf::Zero(3,6*cRmfs_.size());
+  for(uint32_t k=0; k<6*cRmfs_.size(); ++k){
+    int j = (k%6)/2; // which of the rotation columns does this belong to
+    float sign = (- float((k%6)%2) +0.5f)*2.0f; // sign of the axis
+    mfAx.col(k) = sign*cRmfs_[k/6].col(j);
   }
   return mfAx;
 };
 
 void RealtimeMF::scaleDirColors(uint32_t K)
 {
-  this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);
-  this->dirCols_ << 255,0,0,
-              255,0,0,
-              0,255,0,
-              0,255,0,
-              0,0,255,
-              0,0,255;
-  this->K_=6;
+  if (mode_.compare("mmfvmf") == 0) {
+    this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(3*6,3);
+//    this->dirCols_ << 255,0,0, 255,0,0, 0,255,0, 0,255,0, 0,0,255,
+//      0,0,255, 255,20,20, 255,20,20, 20,255,20, 20,255,20, 20,20,255,
+//      20,20,255, 255,40,40, 255,40,40, 40,255,40, 40,255,40, 40,40,255,
+//      40,40,255;
+    this->dirCols_ << 
+      255,0,0,
+      255,0,0,
+      255,0,0,
+      255,0,0,
+      255,0,0,
+      255,0,0,
+      0,255,0,
+      0,255,0,
+      0,255,0,
+      0,255,0,
+      0,255,0,
+      0,255,0,
+      0,0,255,
+      0,0,255,
+      0,0,255,
+      0,0,255,
+      0,0,255,
+      0,0,255;
+    this->K_=6*3;
+  } else {
+    this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);
+    this->dirCols_ << 255,0,0,
+      255,0,0,
+      0,255,0,
+      0,255,0,
+      0,0,255,
+      0,0,255;
+    this->K_=6;
+  }
 }
