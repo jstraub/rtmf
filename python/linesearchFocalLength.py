@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Julian Straub <jstraub@csail.mit.edu> Licensed
 # under the MIT license. See the license file LICENSE.
 
-#import matplotlib.pyplot as plt
 #import matplotlib.cm as cm
 import numpy as np
 #import cv2
@@ -34,7 +33,7 @@ def run(cfg,reRun):
   if 'nCGIter' in cfg.keys():
     args.append('--nCGIter {}'.format(cfg['nCGIter']))
 
-  print "checking if " + cfg['outName']+"_cRmf.csv"
+  print "checking if " + cfg['outName']+"_f.csv"
   if reRun or not os.path.isfile(cfg['outName']+"_f.csv"):
     print ' '.join(args)
     print ' --------------------- '
@@ -79,7 +78,7 @@ cfg['nCGIter'] = 25
 cfg['dt'] = 0.05
 cfg['tMax'] = 5.0
 
-reRun = True
+reRun = False
 printCmd = True
 
 names = []
@@ -90,14 +89,15 @@ for root, dirs, files in os.walk(cfg["dataPath"]):
       names.append(re.sub("_rgb","",name))
   break
 random.shuffle(names)
+#names = names[:300]
 names = names[:100]
 N = 30
 fs = np.linspace(380,720,N)
 print fs
 
 import os.path
-if False and os.path.isfile("focalLengthLines.csv"):
-  error = np.loadtxt("focalLengthLines.csv")
+if True  and os.path.isfile("focalLengthLines_100.csv"):
+  error = np.loadtxt("focalLengthLines_100.csv")
 else:
   error = np.zeros((N,len(names)))
   for i,name in enumerate(names):
@@ -108,9 +108,22 @@ else:
       error[j,i] = run(cfg,reRun)
   np.savetxt("focalLengthLines.csv", error)
 
+f = error
+df = np.diff(f,axis=0)
+idOk = np.max(df,axis=0) < 400
+ddf = np.diff(df,axis=0)
+idOk = np.logical_and(idOk, np.min(ddf,axis=0) > 0.)
+
+fMean = np.mean(f[:,idOk],axis=1)
+print "min: ", np.min(fMean), fs[np.argmin(fMean)]
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(fs,fMean)
+plt.show()
+
 plt.figure()
 for i in range(len(names)):
-  plt.plot(fs,error[:,i],label=names[i])
+  plt.plot(fs[:-1]+0.5*(fs[1]-fs[0]),np.diff(error[:,i]),label=names[i])
 plt.legend()
 
 plt.figure()
