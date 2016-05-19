@@ -80,12 +80,15 @@ int main (int argc, char** argv)
   }else if (mode.compare("vmfCF") == 0){
     cfgOptSO3.nCGIter = 1;
   }
+  
+  std::cout << "mode: " << mode << std::endl;
 
   if(vm.count("tMax")) cfgOptSO3.tMax  = vm["tMax"].as<float>();
   if(vm.count("dt")) cfgOptSO3.dt = vm["dt"].as<float>();
   if(vm.count("nCGIter")) cfgOptSO3.nCGIter = vm["nCGIter"].as<int>();
   findCudaDevice(argc,(const char**)argv);
-  shared_ptr<RealtimeMF> pRtmf(new RealtimeMF(mode,cfgOptSO3,cfgNormals));
+  shared_ptr<RealtimeMF> pRtmf;
+  std::vector<shared_ptr<RealtimeMF> > pRtmfs;
 
   if (path.length() == 0)
   {
@@ -108,10 +111,36 @@ int main (int argc, char** argv)
       cv::waitKey(0);
     }
 
-    RealtimeMF rtmf(mode,cfgOptSO3,cfgNormals);
-    for(uint32_t i=0; i<T; ++i)
-      pRtmf->compute(reinterpret_cast<uint16_t*>(depth.data),
-          depth.cols,depth.rows);
+    if (mode.compare("mmfvmf") == 0) {
+      uint32_t runs = 11;
+      for (uint32_t t=0; t<runs; ++t) {
+        pRtmfs.push_back(shared_ptr<RealtimeMF>(new
+              RealtimeMF(mode,cfgOptSO3,cfgNormals)));
+        for(uint32_t i=0; i<T; ++i)
+          pRtmfs.back()->compute(reinterpret_cast<uint16_t*>(depth.data),
+              depth.cols,depth.rows);
+      }
+      Eigen::VectorXi mfCounts = Eigen::VectorXi::Zero(6);
+      for (uint32_t t=0; t<runs; ++t) {
+        mfCounts[pRtmfs[t]->cRmfs().size()] ++; 
+      }
+      cout<<"image from "<<path<<endl;
+      std::cout << "histogram over MF counts: " << mfCounts.transpose()
+        << std::endl;
+      uint32_t mlMfCount = 1;
+      mfCounts.maxCoeff(&mlMfCount);
+      std::cout << "most likely " << mlMfCount << " MFs" << std::endl;
+      for (uint32_t t=0; t<runs; ++t)
+        if (pRtmfs[t]->cRmfs().size() == mlMfCount) { 
+          pRtmf = pRtmfs[t];
+          break;
+        }
+    } else {
+      pRtmf = shared_ptr<RealtimeMF>(new RealtimeMF(mode,cfgOptSO3,cfgNormals));
+      for(uint32_t i=0; i<T; ++i)
+        pRtmf->compute(reinterpret_cast<uint16_t*>(depth.data),
+            depth.cols,depth.rows);
+    }
 
     cv::Mat dI = pRtmf->smoothDepthImg();
     cv::Mat nI = pRtmf->normalsImg();

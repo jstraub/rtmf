@@ -111,7 +111,7 @@ RealtimeMF::RealtimeMF(std::string mode, const CfgOptSO3& cfg,
   }else if (mode_.compare("vmfCF") == 0){
     optSO3_ = new mmf::OptSO3vMFCF();
   }else if (mode_.compare("mmfvmf") == 0){
-    optSO3_ = new mmf::OptSO3MMFvMF(3);
+    optSO3_ = new mmf::OptSO3MMFvMF(4);
   }
 };
 
@@ -134,6 +134,8 @@ void RealtimeMF::compute_()
   optSO3_->updateExternalGpuNormals(d_nComp,nComp,3,0);
   residual_ = optSO3_->conjugateGradientCUDA(cRmf_,nCGIter_);
   cRmfs_ = optSO3_->GetRs();
+  if (mode_.compare("mmfvmf") == 0 && cRmfs_.size() == 1)
+    cRmf_ = cRmfs_[0];
   std::cout << "have " << cRmfs_.size() << " MFs" << std::endl;
   D_KL_ = optSO3_->D_KL_axisUnif();
   cout<<" -- optimized rotation D_KL to unif "<<D_KL_<<endl
@@ -156,33 +158,37 @@ MatrixXf RealtimeMF::mfAxes()
   return mfAx;
 };
 
-void RealtimeMF::scaleDirColors(uint32_t K)
+void RealtimeMF::scaleDirColors(uint32_t Kk)
 {
-  if (mode_.compare("mmfvmf") == 0) {
+  if (mode_.compare("mmfvmf") == 0 && cRmfs_.size() > 1) {
     this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(3*6,3);
 //    this->dirCols_ << 255,0,0, 255,0,0, 0,255,0, 0,255,0, 0,0,255,
 //      0,0,255, 255,20,20, 255,20,20, 20,255,20, 20,255,20, 20,20,255,
 //      20,20,255, 255,40,40, 255,40,40, 40,255,40, 40,255,40, 40,40,255,
 //      40,40,255;
+
+//  32 ,182,232 tuerkis    
+//  232,139,32  orange     
+//  255,13 ,255 pink       
     this->dirCols_ << 
-      255,0,0,
-      255,0,0,
-      255,0,0,
-      255,0,0,
-      255,0,0,
-      255,0,0,
-      0,255,0,
-      0,255,0,
-      0,255,0,
-      0,255,0,
-      0,255,0,
-      0,255,0,
-      0,0,255,
-      0,0,255,
-      0,0,255,
-      0,0,255,
-      0,0,255,
-      0,0,255;
+      32 ,182,232,
+      32 ,182,232,
+      32 ,182,232,
+      32 ,182,232,
+      32 ,182,232,
+      32 ,182,232,
+      232,139,32 ,
+      232,139,32 ,
+      232,139,32 ,
+      232,139,32 ,
+      232,139,32 ,
+      232,139,32 ,
+      255,13 ,255,
+      255,13 ,255,
+      255,13 ,255,
+      255,13 ,255,
+      255,13 ,255,
+      255,13 ,255;
     this->K_=6*3;
   } else {
     this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);

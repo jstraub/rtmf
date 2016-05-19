@@ -89,15 +89,16 @@ for root, dirs, files in os.walk(cfg["dataPath"]):
       names.append(re.sub("_rgb","",name))
   break
 random.shuffle(names)
+#names = names[:100]
 #names = names[:300]
-names = names[:100]
-N = 30
-fs = np.linspace(380,720,N)
+N = 11
+#fs = np.linspace(380,720,N) # with _300
+fs = np.linspace(500,600,N)
 print fs
 
 import os.path
-if True  and os.path.isfile("focalLengthLines_100.csv"):
-  error = np.loadtxt("focalLengthLines_100.csv")
+if False and os.path.isfile("focalLengthLines_300.csv"):
+  error = np.loadtxt("focalLengthLines_300.csv")
 else:
   error = np.zeros((N,len(names)))
   for i,name in enumerate(names):

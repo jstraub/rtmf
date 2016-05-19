@@ -81,7 +81,7 @@ if(OPENNI)
   cuda_add_executable(realtimeMF ./src/realtimeMF.cpp
     )
   target_link_libraries (realtimeMF
-    jsCore mmf cudaPcl
+    jsCore manifold mmf cudaPcl
     boost_system boost_thread boost_program_options
     pcl_common pcl_io pcl_visualization pcl_filters pcl_features
     pcl_search
@@ -103,7 +103,7 @@ if(LCM OR DRC)
     ./src/jpeg-utils-ijg.c
     )
   target_link_libraries (realtimeMF_lcm
-    jsCore cudaPcl mmf
+    jsCore manifold cudaPcl mmf
   multisense_image_utils
     boost_system boost_thread boost_program_options
     pcl_common pcl_io pcl_visualization pcl_filters pcl_features
