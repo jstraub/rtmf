@@ -180,6 +180,15 @@ int main (int argc, char** argv)
           ofstream::out);
       outf << pRtmf->cost() << std::endl;
       outf.close();
+      ofstream outNs((vm["out"].as<string>()+"_Ns.csv").data(),
+          ofstream::out);
+      for (uint32_t k=0; k<pRtmf->counts().rows()-1; ++k) 
+        outNs << pRtmf->counts()(k) << " ";
+      outNs << pRtmf->counts()(pRtmf->counts().rows()-1) << std::endl;
+      for (uint32_t k=0; k<Rs.size()-1; ++k) 
+        outNs << pRtmf->counts().middleRows(6*k,6).sum() << " ";
+      outNs << pRtmf->counts().middleRows(6*(Rs.size()-1),6).sum() << std::endl;
+      outNs.close();
     }
 
     if(vm.count("display")) 

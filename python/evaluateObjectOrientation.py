@@ -62,6 +62,7 @@ mode = "approxGD"
 mode = "vmfCF"
 mode = "vmf"
 mode = "direct"
+mode = "mmfvmf"
 nyuPath = "/data/vision/fisher/data1/nyu_depth_v2/"
 rtmfPath = "/data/vision/scratch/fisher/jstraub/rtmf/nyu/"
 

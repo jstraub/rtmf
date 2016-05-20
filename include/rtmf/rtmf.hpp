@@ -46,6 +46,7 @@ public:
   MatrixXf mfAxes();
   const Matrix3f& cRmf() { return cRmf_;};
   std::vector<Matrix3f> cRmfs() { return cRmfs_;};
+  const Eigen::VectorXf& counts() { return optSO3_->counts();};
   double cost() { return residual_;};
 
   cv::Mat normalsImg_;

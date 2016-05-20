@@ -81,25 +81,25 @@ cfg['tMax'] = 5.0
 reRun = False
 printCmd = True
 
-names = []
-for root, dirs, files in os.walk(cfg["dataPath"]):
-  for file in files:
-    name,ending = os.path.splitext(file)
-    if ending == '.png' and not re.search("_rgb",name) is None:
-      names.append(re.sub("_rgb","",name))
-  break
-random.shuffle(names)
-#names = names[:100]
-#names = names[:300]
 N = 11
 #fs = np.linspace(380,720,N) # with _300
 fs = np.linspace(500,600,N)
 print fs
 
 import os.path
-if False and os.path.isfile("focalLengthLines_300.csv"):
-  error = np.loadtxt("focalLengthLines_300.csv")
+if True and os.path.isfile("focalLengthLines_1449.csv"):
+  error = np.loadtxt("focalLengthLines_1449.csv")
 else:
+  names = []
+  for root, dirs, files in os.walk(cfg["dataPath"]):
+    for file in files:
+      name,ending = os.path.splitext(file)
+      if ending == '.png' and not re.search("_rgb",name) is None:
+        names.append(re.sub("_rgb","",name))
+    break
+  random.shuffle(names)
+  #names = names[:100]
+  #names = names[:300]
   error = np.zeros((N,len(names)))
   for i,name in enumerate(names):
     cfg['filePath'] = name
@@ -109,11 +109,25 @@ else:
       error[j,i] = run(cfg,reRun)
   np.savetxt("focalLengthLines.csv", error)
 
+#for i in range(error.shape[1]):
+#  plt.plot(fs,np.diff(error[:,i])) #,label=names[i])
+
 f = error
 df = np.diff(f,axis=0)
 idOk = np.max(df,axis=0) < 400
 ddf = np.diff(df,axis=0)
 idOk = np.logical_and(idOk, np.min(ddf,axis=0) > 0.)
+fsmin = fs[np.argmin(f,axis=0)]
+idOk = np.logical_and(idOk, fsmin > 500)
+idOk = np.logical_and(idOk, fsmin < 600)
+print idOk.shape
+print fsmin.shape
+
+plt.figure()
+emin = np.min(error[:,idOk],axis=0)
+fmin = fs[np.argmin(error[:,idOk],axis=0)]
+plt.plot(fmin, emin,'x') 
+plt.show()
 
 fMean = np.mean(f[:,idOk],axis=1)
 print "min: ", np.min(fMean), fs[np.argmin(fMean)]
@@ -123,8 +137,8 @@ plt.plot(fs,fMean)
 plt.show()
 
 plt.figure()
-for i in range(len(names)):
-  plt.plot(fs[:-1]+0.5*(fs[1]-fs[0]),np.diff(error[:,i]),label=names[i])
+for i in range(error.shape[1]):
+  plt.plot(fs[:-1]+0.5*(fs[1]-fs[0]),np.diff(error[:,i])) #,label=names[i])
 plt.legend()
 
 plt.figure()
