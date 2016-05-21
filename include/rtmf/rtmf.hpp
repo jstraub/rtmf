@@ -162,16 +162,17 @@ MatrixXf RealtimeMF::mfAxes()
 void RealtimeMF::scaleDirColors(uint32_t Kk)
 {
   if (mode_.compare("mmfvmf") == 0 && cRmfs_.size() > 1) {
-    this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(3*6,3);
+    Matrix<uint8_t,Dynamic,Dynamic> dirCols(5*6,3);
 //    this->dirCols_ << 255,0,0, 255,0,0, 0,255,0, 0,255,0, 0,0,255,
 //      0,0,255, 255,20,20, 255,20,20, 20,255,20, 20,255,20, 20,20,255,
 //      20,20,255, 255,40,40, 255,40,40, 40,255,40, 40,255,40, 40,40,255,
 //      40,40,255;
-
 //  32 ,182,232 tuerkis    
 //  232,139,32  orange     
 //  255,13 ,255 pink       
-    this->dirCols_ << 
+//  32,232,59 green       
+//  232,65,32 red         
+    dirCols << 
       32 ,182,232,
       32 ,182,232,
       32 ,182,232,
@@ -189,8 +190,22 @@ void RealtimeMF::scaleDirColors(uint32_t Kk)
       255,13 ,255,
       255,13 ,255,
       255,13 ,255,
-      255,13 ,255;
-    this->K_=6*3;
+      255,13 ,255,
+      32,232,59,
+      32,232,59,
+      32,232,59,
+      32,232,59,
+      32,232,59,
+      32,232,59,
+      232,65,32,   
+      232,65,32,   
+      232,65,32,   
+      232,65,32,   
+      232,65,32,   
+      232,65,32;
+    this->dirCols_ = dirCols.topRows(6*Kk);
+    this->K_=6*Kk;
+//    std::cout << this->dirCols_.cast<float>() << std::endl;
   } else {
     this->dirCols_ = Matrix<uint8_t,Dynamic,Dynamic>(6,3);
     this->dirCols_ << 255,0,0,

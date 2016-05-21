@@ -122,7 +122,12 @@ int main (int argc, char** argv)
       }
       Eigen::VectorXi mfCounts = Eigen::VectorXi::Zero(6);
       for (uint32_t t=0; t<runs; ++t) {
-        mfCounts[pRtmfs[t]->cRmfs().size()] ++; 
+        Eigen::VectorXf counts(pRtmfs[t]->cRmfs().size());
+        for (uint32_t k=0; k<pRtmfs[t]->cRmfs().size(); ++k) 
+          counts(k) = pRtmfs[t]->counts().middleRows(6*k,6).sum();
+        counts = counts.array() / counts.sum();
+        std::cout << counts.transpose() << ": " << (counts.array()>0.1).count() << std::endl;
+        mfCounts[(counts.array()>0.1).count()] ++; 
       }
       cout<<"image from "<<path<<endl;
       std::cout << "histogram over MF counts: " << mfCounts.transpose()
@@ -160,7 +165,7 @@ int main (int argc, char** argv)
 //    cv::Mat Iout;
 //    cv::addWeighted(rgb , 0.7, zI, 0.3, 0.0, Iout);
 //    projectDirections(Iout,pRtmf->mfAxes(),cfgNormals.f_d,pRtmf->mfAxCols_);
-    cv::Mat Iout = pRtmf->overlaySeg(gray);
+    cv::Mat Iout = pRtmf->overlaySeg(gray,true,true);
 
     if(vm.count("out"))
     {

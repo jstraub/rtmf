@@ -68,8 +68,8 @@ cfg['mode'] = args.mode;
 cfg['resultsPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu/'
 cfg['dataPath'] = "/data/vision/fisher/data1/nyu_depth_v2/extracted/"
 
-#cfg['resultsPath'] = './'
-#cfg['dataPath'] = "../data/"
+cfg['resultsPath'] = './'
+cfg['dataPath'] = "../data/"
 
 # for eval of the high quality results of the direct method
 cfg['nCGIter'] = 25
