@@ -27,6 +27,7 @@ endif()
 set(LCM OFF)
 set(DRC OFF)
 set(OPENNI ON)
+set(REALSENSE ON)
 
 find_package (Eigen3 REQUIRED)
 find_package (VTK REQUIRED)
@@ -94,6 +95,30 @@ if(OPENNI)
   pods_install_headers(
     ./include/rtmf/rtmf.hpp
     ./include/rtmf/realtimeMF_openni.hpp
+    ./include/rtmf/realtimeMF_realsense.hpp
+    DESTINATION rtmf)
+endif()
+
+if(REALSENSE)
+  message("-- compiling for RealSense")
+  cuda_add_executable(realtimeMF_realsense ./src/realtimeMF_realsense.cpp
+    )
+  target_link_libraries (realtimeMF_realsense
+    jsCore manifold mmf cudaPcl
+    rgbdGrabber
+    boost_system boost_thread boost_program_options
+    pcl_common pcl_io pcl_visualization pcl_filters pcl_features
+    pcl_search
+    OpenNI XnVNite_1_5_2 
+     vtkCommon vtkFiltering vtkRendering vtkGraphics 
+    opencv_core opencv_highgui opencv_imgproc
+    opencv_contrib
+    )
+  pods_install_executables(realtimeMF_realsense)
+  pods_install_headers(
+    ./include/rtmf/rtmf.hpp
+    ./include/rtmf/realtimeMF_openni.hpp
+    ./include/rtmf/realtimeMF_realsense.hpp
     DESTINATION rtmf)
 endif()
 

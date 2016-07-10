@@ -67,6 +67,7 @@ checkout:
 	git clone https://github.com/jstraub/cudaPcl.git
 	git clone https://github.com/jstraub/mmf.git
 	git clone https://github.com/jstraub/manifold.git
+	git clone https://github.com/jstraub/rgbdGrabber.git
 #	svn co https://svn.csail.mit.edu/rrg_pods/drivers/kinect
 
 update:
@@ -74,6 +75,7 @@ update:
 	cd mmf; git pull; cd -
 	cd jsCore; git pull; cd -
 	cd manifold; git pull; cd -
+	cd rgbdGrabber; git pull; cd -
 #	cd kinect; svn up; cd -
 
 # other (custom) targets are passed through to the cmake-generated Makefile

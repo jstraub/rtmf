@@ -64,13 +64,15 @@ mode = "vmf"
 mode = "direct"
 mode = "mmfvmf"
 nyuPath = "/data/vision/fisher/data1/nyu_depth_v2/"
+nyuPath = "/media/jstraub/research/nyu_depth_v2/"
 rtmfPath = "/data/vision/scratch/fisher/jstraub/rtmf/nyu/"
+rtmfPath = "/media/jstraub/research/rtmf/nyu/"
 
 with open(os.path.join(nyuPath,"labels.txt")) as f:
   labels = [label[:-1] for label in f.readlines()]
 print len(labels), labels
 
-if True  and os.path.isfile("./angularObjectDeviations_rtmf_"+mode+".csv"):
+if False and os.path.isfile("./angularObjectDeviations_rtmf_"+mode+".csv"):
   error = np.loadtxt("./angularObjectDeviations_rtmf_"+mode+".csv")
   plt.figure()
   percentiles = []
@@ -157,6 +159,13 @@ for i,rtmfPath in enumerate(rtmfPaths):
     continue
 #  try:
   R = np.loadtxt(rtmfPath)
+  with open(re.sub("cRmf","Ns",rtmfPath),"r") as f:
+    f.readline()
+    Ns = np.loadtxt(f)
+    if Ns.size > 2: # only use the first two MFs
+      idUse = np.argsort(Ns)[::-1]
+      print Ns, Ns[idUse]
+      R = np.concatenate((R[:,idUse[0]*3:(idUse[0]+1)*3],R[:,idUse[1]*3:(idUse[1]+1)*3]),axis=1)
   rgbd = RgbdFrame(540.)
   rgbd.load(re.sub("_l.png","",labelImgPathMatch ))
   lImg = cv2.imread(labelImgPathMatch,cv2.CV_LOAD_IMAGE_UNCHANGED)
@@ -176,7 +185,8 @@ for i,rtmfPath in enumerate(rtmfPaths):
 ##        print anglesToY[-1], Rn
 #    error[lId,i] = min(anglesToY)
     error[lId,i]=np.mean(np.arccos(np.max(np.abs(M.T.dot(ns)),axis=0))*180./np.pi)
-    print "direction of {} surface normals:".format(labels[lId])," error ",error[lId,i]
+    if not np.isnan(error[lId,i]):
+      print "direction of {} surface normals:".format(labels[lId])," error ",error[lId,i]
 
   if False:
     n = rgbd.getNormals()[rgbd.mask,:]
