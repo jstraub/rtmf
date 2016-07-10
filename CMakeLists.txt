@@ -24,9 +24,13 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "default install path" FORCE )
 endif()
 
+
+# turn different compile modes on and off
 set(LCM OFF)
 set(DRC OFF)
 set(OPENNI ON)
+
+set(OPENNI2 OFF)  # untested hence off
 set(REALSENSE ON)
 
 find_package (Eigen3 REQUIRED)
@@ -95,7 +99,28 @@ if(OPENNI)
   pods_install_headers(
     ./include/rtmf/rtmf.hpp
     ./include/rtmf/realtimeMF_openni.hpp
-    ./include/rtmf/realtimeMF_realsense.hpp
+    DESTINATION rtmf)
+endif()
+
+if(OPENNI2)
+  message("-- compiling for OpenNi2")
+  cuda_add_executable(realtimeMF_openni2 ./src/realtimeMF_openni2.cpp
+    )
+  target_link_libraries (realtimeMF_openni2
+    jsCore manifold mmf cudaPcl
+    rgbdGrabber
+    boost_system boost_thread boost_program_options
+    pcl_common pcl_io pcl_visualization pcl_filters pcl_features
+    pcl_search
+    OpenNI XnVNite_1_5_2 
+     vtkCommon vtkFiltering vtkRendering vtkGraphics 
+    opencv_core opencv_highgui opencv_imgproc
+    opencv_contrib
+    )
+  pods_install_executables(realtimeMF_openni2)
+  pods_install_headers(
+    ./include/rtmf/rtmf.hpp
+    ./include/rtmf/realtimeMF_openni2.hpp
     DESTINATION rtmf)
 endif()
 
@@ -117,7 +142,6 @@ if(REALSENSE)
   pods_install_executables(realtimeMF_realsense)
   pods_install_headers(
     ./include/rtmf/rtmf.hpp
-    ./include/rtmf/realtimeMF_openni.hpp
     ./include/rtmf/realtimeMF_realsense.hpp
     DESTINATION rtmf)
 endif()
