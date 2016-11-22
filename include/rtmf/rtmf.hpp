@@ -49,6 +49,11 @@ public:
   const Eigen::VectorXf& counts() { return optSO3_->counts();};
   double cost() { return residual_;};
 
+  void Reset() { 
+    optSO3_->ResetRs(); 
+    cRmf_ = Eigen::Matrix3f::Identity(); 
+  }
+
   cv::Mat normalsImg_;
 protected:
     const static uint32_t K_MAX = 6;
@@ -131,8 +136,9 @@ void RealtimeMF::compute_()
   cout<<" -- compressed to "<<nComp<<" normals"<<endl;
 //      normalsImg_ = normalExtract_->normalsImg();
   // optimize normals
-  tLog_.toc(2); // total time
+  tLog_.toctic(2,3); 
   optSO3_->updateExternalGpuNormals(d_nComp,nComp,3,0);
+  
   residual_ = optSO3_->conjugateGradientCUDA(cRmf_,nCGIter_);
   cRmfs_ = optSO3_->GetRs();
   if (mode_.compare("mmfvmf") == 0 && cRmfs_.size() == 1)
@@ -141,8 +147,9 @@ void RealtimeMF::compute_()
   D_KL_ = optSO3_->D_KL_axisUnif();
   cout<<" -- optimized rotation D_KL to unif "<<D_KL_<<endl
     <<cRmf_<<endl;
-  tLog_.setDt(3,optSO3_->dtPrep());
-  tLog_.setDt(4,optSO3_->dtCG());
+  tLog_.toc(3); 
+//  tLog_.setDt(3,optSO3_->dtPrep());
+//  tLog_.setDt(4,optSO3_->dtCG());
   tLog_.logCycle();
   haveLabels_ = false;
 };

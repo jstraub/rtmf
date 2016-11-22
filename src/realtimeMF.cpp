@@ -78,7 +78,8 @@ int main (int argc, char** argv)
     cfgOptSO3.tMax = 5.f;
     cfgOptSO3.dt = 0.05f;
   }else if (mode.compare("vmfCF") == 0){
-    cfgOptSO3.nCGIter = 1;
+    cfgOptSO3.nCGIter = T; // vmfCF iterates internally reassigning data points etc.
+    T = 10; // tunr a couple of times since time logging only starts after one initial run
   }
   
   std::cout << "mode: " << mode << std::endl;
@@ -142,9 +143,13 @@ int main (int argc, char** argv)
         }
     } else {
       pRtmf = shared_ptr<RealtimeMF>(new RealtimeMF(mode,cfgOptSO3,cfgNormals));
-      for(uint32_t i=0; i<T; ++i)
-        pRtmf->compute(reinterpret_cast<uint16_t*>(depth.data),
-            depth.cols,depth.rows);
+      for(uint32_t i=0; i<T; ++i) {
+        if (mode.compare("vmfCF") == 0) {
+          pRtmf->Reset();
+          pRtmf->compute(reinterpret_cast<uint16_t*>(depth.data),
+              depth.cols,depth.rows);
+        }
+      }
     }
 
     cv::Mat dI = pRtmf->smoothDepthImg();
@@ -167,6 +172,9 @@ int main (int argc, char** argv)
 //    projectDirections(Iout,pRtmf->mfAxes(),cfgNormals.f_d,pRtmf->mfAxCols_);
     cv::Mat Iout = pRtmf->overlaySeg(gray,true,true);
 
+    std::cout << "Timing stats" << std::endl;
+    pRtmf->printTimingStats();
+
     if(vm.count("out"))
     {
       cv::imwrite(vm["out"].as<string>()+"_rgbLabels.png",Iout);
@@ -181,6 +189,16 @@ int main (int argc, char** argv)
         out << std::endl;
       }
       out.close();
+      std::vector<float> means;
+      std::vector<float> stds;
+      pRtmf->getTimingStats(means, stds);
+      ofstream outdt((vm["out"].as<string>()+"_dts.csv").data(),
+          ofstream::out);
+      outdt << "dtmean dtstd" << std::endl;
+      for (size_t i=0; i<means.size(); ++i) {
+        outdt << means[i] << " " << stds[i] << std::endl;
+      }
+      outdt.close();
       ofstream outf((vm["out"].as<string>()+"_f.csv").data(),
           ofstream::out);
       outf << pRtmf->cost() << std::endl;

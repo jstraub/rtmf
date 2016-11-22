@@ -41,14 +41,22 @@ def run(cfg,reRun):
     print ' --------------------- '
     time.sleep(1)
     err = subp.call(' '.join(args),shell=True)
+    with open(cfg['outName']+"_cRmf.csv") as f:
+      R = np.loadtxt(f)
+    with open(cfg['outName']+"_dts.csv") as f:
+      print f.readline()
+      dt = np.loadtxt(f)[-1,0] # total time in ms
+      dt *= 1e-3
     if err:
       print 'error when executing'
   else:
     print "skipping " + cfg['dataPath']+cfg['filePath']
+    dt = 0.
+    R = np.eye(3)
+  return R, dt
 #      raw_input()
 #  z = np.loadtxt(cfg['outName']+'.lbl',dtype=int,delimiter=' ')
 #  sil = np.loadtxt(cfg['outName']+'.lbl_measures.csv',delimiter=" ")
-
 
 def config2Str(cfg):
   use = ['mode','dt','tMax','nCGIter']
@@ -59,14 +67,15 @@ def config2Str(cfg):
   return st
 
 parser = argparse.ArgumentParser(description = 'rtmf extraction for NYU')
-parser.add_argument('-m','--mode', default='vmf', 
+parser.add_argument('-m','--mode', default='vmfCF', 
     help='vmf, approx, direct')
 args = parser.parse_args()
 
 cfg=dict()
 cfg['mode'] = args.mode;
-cfg['resultsPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/nyu/'
+cfg['resultsPath'] = '/data/vision/scratch/fisher/jstraub/rtmf/pamiMMF/'
 cfg['dataPath'] = "/data/vision/fisher/data1/nyu_depth_v2/extracted/"
+indexPath = "/data/vision/fisher/data1/nyu_depth_v2/index.txt"
 
 #cfg['resultsPath'] = './'
 #cfg['dataPath'] = "../data/"
@@ -79,20 +88,27 @@ cfg['tMax'] = 5.0
 reRun = True
 printCmd = True
 
+#names = []
+#for root, dirs, files in os.walk(cfg["dataPath"]):
+#  for file in files:
+#    name,ending = os.path.splitext(file)
+#    if ending == '.png' and not re.search("_rgb",name) is None:
+#      names.append(re.sub("_rgb","",name))
+#  break
 
-names = []
-for root, dirs, files in os.walk(cfg["dataPath"]):
-  for file in files:
-    name,ending = os.path.splitext(file)
-    if ending == '.png' and not re.search("_rgb",name) is None:
-      names.append(re.sub("_rgb","",name))
-  break
-random.shuffle(names)
+with open(indexPath) as f:
+  names = [name[:-1] for name in f.readlines()]
 
-error = np.zeros((2,len(names)))
+
+Rs = np.zeros((3*len(names),3))
+dts = np.zeros(len(names))
 for i,name in enumerate(names):
   cfg['filePath'] = name
   cfg['outName'] = cfg['resultsPath']+cfg['filePath']+'_'+config2Str(cfg)
-  run(cfg,reRun)
-
-
+  R, dt = run(cfg,reRun)
+  print R
+  print "time: ", dt
+  Rs[i*3:(i+1)*3,:],dts[i] = R, dt
+    
+np.savetxt( "./rtmf_{}_Rs.csv".format(args.mode), Rs)
+np.savetxt( "./rtmf_{}_ts.csv".format(args.mode), dts)
