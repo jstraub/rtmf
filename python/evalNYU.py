@@ -67,7 +67,7 @@ def config2Str(cfg):
   return st
 
 parser = argparse.ArgumentParser(description = 'rtmf extraction for NYU')
-parser.add_argument('-m','--mode', default='vmfCF', 
+parser.add_argument('-m','--mode', default='mmfvmf', 
     help='vmf, approx, direct')
 args = parser.parse_args()
 
@@ -99,8 +99,7 @@ printCmd = True
 with open(indexPath) as f:
   names = [name[:-1] for name in f.readlines()]
 
-
-Rs = np.zeros((3*len(names),3))
+f = open("./rtmf_{}_Rs.csv".format(args.mode),"w")
 dts = np.zeros(len(names))
 for i,name in enumerate(names):
   cfg['filePath'] = name
@@ -108,7 +107,8 @@ for i,name in enumerate(names):
   R, dt = run(cfg,reRun)
   print R
   print "time: ", dt
-  Rs[i*3:(i+1)*3,:],dts[i] = R, dt
-    
-np.savetxt( "./rtmf_{}_Rs.csv".format(args.mode), Rs)
+  dts[i] = dt
+  np.savetxt(f, R)
+  f.flush()
+f.close() 
 np.savetxt( "./rtmf_{}_ts.csv".format(args.mode), dts)

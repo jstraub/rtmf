@@ -80,6 +80,9 @@ int main (int argc, char** argv)
   }else if (mode.compare("vmfCF") == 0){
     cfgOptSO3.nCGIter = T; // vmfCF iterates internally reassigning data points etc.
     T = 10; // tunr a couple of times since time logging only starts after one initial run
+  }else if (mode.compare("mmfvmf") == 0){
+    cfgOptSO3.nCGIter = T; // vmfCF iterates internally reassigning data points etc.
+    T = 10; // tunr a couple of times since time logging only starts after one initial run
   }
   
   std::cout << "mode: " << mode << std::endl;
@@ -117,27 +120,32 @@ int main (int argc, char** argv)
       for (uint32_t t=0; t<runs; ++t) {
         pRtmfs.push_back(shared_ptr<RealtimeMF>(new
               RealtimeMF(mode,cfgOptSO3,cfgNormals)));
-        for(uint32_t i=0; i<T; ++i)
+        for(uint32_t i=0; i<T; ++i) {
+          pRtmfs.back()->Reset();
           pRtmfs.back()->compute(reinterpret_cast<uint16_t*>(depth.data),
               depth.cols,depth.rows);
+        }
       }
-      Eigen::VectorXi mfCounts = Eigen::VectorXi::Zero(6);
+      Eigen::VectorXi mfCountHist = Eigen::VectorXi::Zero(6);
+      std::vector<uint32_t> mfCounts;
       for (uint32_t t=0; t<runs; ++t) {
         Eigen::VectorXf counts(pRtmfs[t]->cRmfs().size());
         for (uint32_t k=0; k<pRtmfs[t]->cRmfs().size(); ++k) 
           counts(k) = pRtmfs[t]->counts().middleRows(6*k,6).sum();
         counts = counts.array() / counts.sum();
         std::cout << counts.transpose() << ": " << (counts.array()>0.1).count() << std::endl;
-        mfCounts[(counts.array()>0.1).count()] ++; 
+        mfCountHist[(counts.array()>0.1).count()] ++; 
+        mfCounts.push_back((counts.array()>0.1).count());
       }
       cout<<"image from "<<path<<endl;
-      std::cout << "histogram over MF counts: " << mfCounts.transpose()
+      std::cout << "histogram over MF counts: " << mfCountHist.transpose()
         << std::endl;
       uint32_t mlMfCount = 1;
-      mfCounts.maxCoeff(&mlMfCount);
+      mfCountHist.maxCoeff(&mlMfCount);
       std::cout << "most likely " << mlMfCount << " MFs" << std::endl;
       for (uint32_t t=0; t<runs; ++t)
-        if (pRtmfs[t]->cRmfs().size() == mlMfCount) { 
+        if (mfCounts[t] == mlMfCount) { 
+          std::cout << "using " << t << "th run of mmfmvf" << std::endl;
           pRtmf = pRtmfs[t];
           break;
         }
@@ -151,6 +159,10 @@ int main (int argc, char** argv)
         }
       }
     }
+
+    std::cout << "Timing stats" << std::endl;
+    std::cout << pRtmf << std::endl;
+    pRtmf->printTimingStats();
 
     cv::Mat dI = pRtmf->smoothDepthImg();
     cv::Mat nI = pRtmf->normalsImg();
@@ -172,8 +184,6 @@ int main (int argc, char** argv)
 //    projectDirections(Iout,pRtmf->mfAxes(),cfgNormals.f_d,pRtmf->mfAxCols_);
     cv::Mat Iout = pRtmf->overlaySeg(gray,true,true);
 
-    std::cout << "Timing stats" << std::endl;
-    pRtmf->printTimingStats();
 
     if(vm.count("out"))
     {
